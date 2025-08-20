@@ -3,7 +3,6 @@
 header("Cache-Control: no-cache");
 header("Content-Type: text/html");
 
-// Start HTML output
 echo <<<HTML
 <!DOCTYPE html>
 <html>
@@ -15,11 +14,9 @@ echo <<<HTML
     <hr>
 HTML;
 
-// Output the message body
 echo "<b>Message Body:</b><br />\n";
 echo "<ul>\n";
 
-// Loop through POST data
 $loop = 0;
 foreach ($_POST as $key => $value) {
     $loop++;

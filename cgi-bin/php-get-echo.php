@@ -13,7 +13,6 @@ echo '<!DOCTYPE html>
 
 echo '<b>Query String:</b> ' . htmlspecialchars($_SERVER['QUERY_STRING']) . '<br />';
 
-// Loop through GET parameters
 $loop = 0;
 foreach ($_GET as $key => $value) {
     $loop++;

@@ -1,15 +1,11 @@
 <?php
-// Start the session
 session_start();
 
-// Delete all session variables and destroy the session
 session_unset();
 session_destroy();
 
-// Optionally, expire the session cookie
 setcookie(session_name(), '', time() - 3600, '/');
 
-// Output HTML page
 echo <<<HTML
 <!DOCTYPE html>
 <html>

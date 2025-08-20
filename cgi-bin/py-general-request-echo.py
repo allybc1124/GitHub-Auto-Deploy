@@ -13,7 +13,6 @@ print("""<!DOCTYPE html>
 <h1 align="center">General Request Echo</h1>
 <hr>""")
 
-# Get environment variables
 server_protocol = os.environ.get("SERVER_PROTOCOL", "Unknown")
 request_method = os.environ.get("REQUEST_METHOD", "Unknown")
 query_string = os.environ.get("QUERY_STRING", "")
@@ -22,7 +21,6 @@ print(f"<p><b>HTTP Protocol:</b> {server_protocol}</p>")
 print(f"<p><b>HTTP Method:</b> {request_method}</p>")
 print(f"<p><b>Query String:</b> {query_string}</p>")
 
-# Read POST data from stdin if any
 content_length = int(os.environ.get("CONTENT_LENGTH", 0))
 form_data = sys.stdin.read(content_length) if content_length > 0 else ""
 

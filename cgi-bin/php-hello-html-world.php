@@ -13,7 +13,7 @@ echo "<h1>Allison was here - Hello, PHP!</h1>";
 echo "<p>This page was generated with the PHP programming language</p>";
 
 // Current time
-$date = date("r"); // RFC 2822 formatted date, similar to Perl's localtime
+$date = date("r");
 echo "<p>Current Time: $date</p>";
 
 // IP Address
