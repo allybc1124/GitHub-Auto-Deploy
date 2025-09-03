@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Analytics Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+  <style>
+    /* Basic page styling */
+    body {
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      color: #34495e;
+    }
+
+    .chart-container {
+  	background-color: #fff;           
+  	padding: 20px;                     
+  	margin: 20px auto;                
+  	border: 1px solid #fff;            
+  	max-width: 900px;                  
+	}
+  </style>
+</head>
+<body>
+  <h1>Analytics Dashboard</h1>
+
+  <div class="chart-container">
+    <h3>Session Activity Overview (Bar Chart)</h3>
+    <div id="activityBarChart"></div>
+  </div>
+
+  <div class="chart-container">
+    <h3>Window Dimensions per Session (Bar Chart)</h3>
+    <div id="barChart"></div>
+  </div>
+
+  <div class="chart-container">
+    <h3>Mouse Movement Distribution (Pie Chart)</h3>
+    <div id="pieChart"></div>
+  </div>
+
+  <script>
+    async function fetchData() {
+      try {
+        const activityResponse = await fetch('/api/activity');
+        const activityData = await activityResponse.json();
+        const activities = activityData.data;
+
+        const sessionIds = activities.map(a => a.session_id);
+        const scrollsCounts = sessionIds.map(id => activities.find(a => a.session_id === id)?.scrolls_count || 0);
+        const keyEventsCounts = sessionIds.map(id => activities.find(a => a.session_id === id)?.key_events_count || 0);
+        const idlePeriodsCounts = sessionIds.map(id => activities.find(a => a.session_id === id)?.idle_periods_count || 0);
+
+        const staticResponse = await fetch('/api/static');
+        const staticData = await staticResponse.json();
+        const barLabels = staticData.map(s => `${s.id}`);
+        const windowWidths = staticData.map(s => s.window_width || 0);
+        const windowHeights = staticData.map(s => s.window_height || 0);
+
+        const buckets = { '0 movements':0, '1 movement':0, '2 movements':0, '3 movements':0, '4+ movements':0 };
+        activities.forEach(a => {
+          const m = a.mouse_movements_count;
+          if (m === 0) buckets['0 movements']++;
+          else if (m === 1) buckets['1 movement']++;
+          else if (m === 2) buckets['2 movements']++;
+          else if (m === 3) buckets['3 movements']++;
+          else buckets['4+ movements']++;
+        });
+        const pieLabels = Object.keys(buckets);
+        const pieValues = Object.values(buckets);
+
+        renderActivityBarChart(sessionIds, scrollsCounts, keyEventsCounts, idlePeriodsCounts);
+        renderBarChart(barLabels, windowWidths, windowHeights);
+        renderPieChart(pieLabels, pieValues);
+
+      } catch(err) {
+        console.error('Error fetching analytics data:', err);
+      }
+    }
+
+    function renderActivityBarChart(labels, scrolls, keyEvents, idlePeriods) {
+      const config = {
+        type: 'bar',
+        title: { text: 'Session Activity Overview' },
+        scaleX: { labels: labels, label: { text: 'Session ID' } },
+        scaleY: { label: { text: 'Count' } },
+        legend: { draggable:true, toggleAction:'hide', align:'right', verticalAlign:'top', marker:{type:'square', size:10} },
+        series: [
+          { values: scrolls, text:'Scrolls', backgroundColor:'#1D84B5' },
+          { values: keyEvents, text:'Key Events', backgroundColor:'#832161' },
+          { values: idlePeriods, text:'Idle Periods', backgroundColor:'#DA4167' }
+        ]
+      };
+      zingchart.render({ id:'activityBarChart', data:config, height:400, width:'100%' });
+    }
+
+    function renderBarChart(labels, widths, heights) {
+      const config = {
+        type: 'bar',
+        title: { text: 'Window Dimensions per Session' },
+        scaleX: { labels: labels, label: { text: 'Session Number' } },
+        scaleY: { label: { text: 'Pixels' } },
+        legend: { draggable:true, toggleAction:'hide', align:'right', verticalAlign:'top', marker:{type:'square', size:10} },
+        series: [
+          { values: widths, text:'Window Width', backgroundColor:'#FCCA46' },
+          { values: heights, text:'Window Height', backgroundColor:'#e74c3c' }
+        ]
+      };
+      zingchart.render({ id:'barChart', data:config, height:400, width:'100%' });
+    }
+
+    function renderPieChart(labels, values) {
+      const series = labels.map((label,i)=>({text:label,values:[values[i]]}));
+      const config = {
+        type:'pie',
+        title:{text:'Mouse Movement Distribution'},
+        series:series,
+        plot:{valueBox:{text:'%t: %v (%npv%)', fontSize:10}}
+      };
+      zingchart.render({id:'pieChart', data:config, height:400, width:'100%'});
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchData);
+  </script>
+</body>
+</html>
+
