@@ -171,5 +171,4 @@ window.addEventListener("mousemove", e => {
   window.addEventListener("load", init);
   window.addEventListener("beforeunload", sendFinalReport);
   
-  
 
